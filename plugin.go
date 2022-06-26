@@ -46,7 +46,16 @@ func setupPluginTFState(p ConfigPlugin, c *Config) error {
 	} else {
 		return errors.New("tfstate plugin requires path or url for tfstate location")
 	}
-	funcs, err := tfstate.FuncMap(loc)
+
+	funcMapName := "tfstate"
+	if p.Config["prefix"] != nil {
+		prefix, ok := p.Config["prefix"].(string)
+		if !ok {
+			return errors.New("as tfstate plugin options, prefix must be a string")
+		}
+		funcMapName = fmt.Sprintf("%s_%s", prefix, funcMapName)
+	}
+	funcs, err := tfstate.FuncMapWithName(funcMapName, loc)
 	if err != nil {
 		return err
 	}
